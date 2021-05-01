@@ -37,9 +37,7 @@ static const std::string EMPTY_STR;  // NOLINT
 
 class ExplainInfoImpl : public ExplainInfo {
  public:
-    ExplainInfoImpl(const SchemaImpl& input_schema,
-                    const SchemaImpl& output_schema,
-                    const std::string& logical_plan,
+    ExplainInfoImpl(const SchemaImpl& input_schema, const SchemaImpl& output_schema, const std::string& logical_plan,
                     const std::string& physical_plan, const std::string& ir)
         : input_schema_(input_schema),
           output_schema_(output_schema),
@@ -70,55 +68,40 @@ class TabletSdkImpl : public TabletSdk {
  public:
     TabletSdkImpl() {}
 
-    explicit TabletSdkImpl(const std::string& endpoint)
-        : endpoint_(endpoint), channel_(NULL) {}
+    explicit TabletSdkImpl(const std::string& endpoint) : endpoint_(endpoint), channel_(NULL) {}
 
     ~TabletSdkImpl() { delete channel_; }
 
     bool Init();
 
-    std::shared_ptr<ResultSet> Query(const std::string& db,
-                                     const std::string& sql,
-                                     sdk::Status* status) {
+    std::shared_ptr<ResultSet> Query(const std::string& db, const std::string& sql, sdk::Status* status) {
         return Query(db, sql, EMPTY_STR, true, status);
     }
 
-    std::shared_ptr<ResultSet> Query(const std::string& db,
-                                     const std::string& sql,
-                                     const std::string& row,
+    std::shared_ptr<ResultSet> Query(const std::string& db, const std::string& sql, const std::string& row,
                                      sdk::Status* status) {
         return Query(db, sql, row, false, status);
     }
 
-    void Insert(const std::string& db, const std::string& sql,
-                sdk::Status* status);
+    void Insert(const std::string& db, const std::string& sql, sdk::Status* status);
 
-    std::shared_ptr<ExplainInfo> Explain(const std::string& db,
-                                         const std::string& sql,
-                                         sdk::Status* status);
+    std::shared_ptr<ExplainInfo> Explain(const std::string& db, const std::string& sql, sdk::Status* status);
 
  private:
-    void BuildInsertRequest(const std::string& db, const std::string& table,
-                            const std::vector<std::string>& columns,
-                            node::ExprListNode* insert_value,
-                            tablet::InsertRequest* request,
-                            sdk::Status* status);
+    void BuildInsertRequest(const std::string& db, const std::string& table, const std::vector<std::string>& columns,
+                            node::ExprListNode* insert_value, tablet::InsertRequest* request, sdk::Status* status);
 
     void Insert(const tablet::InsertRequest& request, sdk::Status* status);
 
-    bool GetSchema(const std::string& db, const std::string& table,
-                   type::TableDef* schema, sdk::Status* status);
+    bool GetSchema(const std::string& db, const std::string& table, type::TableDef* schema, sdk::Status* status);
 
-    void GetSqlPlan(
-        const std::string& db, const std::string& sql,
-        node::NodeManager& node_manager,  // NOLINT (runtime/references)
-        node::PlanNodeList& plan_trees,   // NOLINT (runtime/references)
-        sdk::Status& status);             // NOLINT (runtime/references)
+    void GetSqlPlan(const std::string& db, const std::string& sql,
+                    node::NodeManager& node_manager,  // NOLINT (runtime/references)
+                    node::PlanNodeList& plan_trees,   // NOLINT (runtime/references)
+                    sdk::Status& status);             // NOLINT (runtime/references)
 
-    std::shared_ptr<ResultSet> Query(const std::string& db,
-                                     const std::string& sql,
-                                     const std::string& row, bool is_batch,
-                                     sdk::Status* status);
+    std::shared_ptr<ResultSet> Query(const std::string& db, const std::string& sql, const std::string& row,
+                                     bool is_batch, sdk::Status* status);
 
  private:
     std::string endpoint_;
@@ -135,8 +118,7 @@ bool TabletSdkImpl::Init() {
     return true;
 }
 
-void TabletSdkImpl::Insert(const tablet::InsertRequest& request,
-                           sdk::Status* status) {
+void TabletSdkImpl::Insert(const tablet::InsertRequest& request, sdk::Status* status) {
     ::hybridse::tablet::TabletServer_Stub stub(channel_);
     ::hybridse::tablet::InsertResponse response;
     brpc::Controller cntl;
@@ -148,19 +130,15 @@ void TabletSdkImpl::Insert(const tablet::InsertRequest& request,
     status->code = 0;
 }
 
-std::shared_ptr<ResultSet> TabletSdkImpl::Query(const std::string& db,
-                                                const std::string& sql,
-                                                const std::string& row,
-                                                bool is_batch,
-                                                sdk::Status* status) {
+std::shared_ptr<ResultSet> TabletSdkImpl::Query(const std::string& db, const std::string& sql, const std::string& row,
+                                                bool is_batch, sdk::Status* status) {
     if (status == NULL) {
         return std::shared_ptr<ResultSet>();
     }
 
     ::hybridse::tablet::TabletServer_Stub stub(channel_);
     ::hybridse::tablet::QueryRequest request;
-    std::unique_ptr<tablet::QueryResponse> response(
-        new tablet::QueryResponse());
+    std::unique_ptr<tablet::QueryResponse> response(new tablet::QueryResponse());
     request.set_sql(sql);
     request.set_db(db);
     request.set_is_batch(is_batch);
@@ -181,14 +159,13 @@ std::shared_ptr<ResultSet> TabletSdkImpl::Query(const std::string& db,
         return std::shared_ptr<ResultSet>();
     }
     status->code = 0;
-    std::shared_ptr<ResultSetImpl> impl(
-        new ResultSetImpl(std::move(response), std::move(cntl)));
+    std::shared_ptr<ResultSetImpl> impl(new ResultSetImpl(std::move(response), std::move(cntl)));
     impl->Init();
     return impl;
 }
 
-bool TabletSdkImpl::GetSchema(const std::string& db, const std::string& table,
-                              type::TableDef* schema, sdk::Status* status) {
+bool TabletSdkImpl::GetSchema(const std::string& db, const std::string& table, type::TableDef* schema,
+                              sdk::Status* status) {
     if (schema == NULL || status == NULL) return false;
     ::hybridse::tablet::TabletServer_Stub stub(channel_);
     ::hybridse::tablet::GetTablesSchemaRequest request;
@@ -211,8 +188,7 @@ bool TabletSdkImpl::GetSchema(const std::string& db, const std::string& table,
     return true;
 }
 
-std::shared_ptr<ExplainInfo> TabletSdkImpl::Explain(const std::string& db,
-                                                    const std::string& sql,
+std::shared_ptr<ExplainInfo> TabletSdkImpl::Explain(const std::string& db, const std::string& sql,
                                                     sdk::Status* status) {
     if (status == NULL) return std::shared_ptr<ExplainInfo>();
     ::hybridse::tablet::TabletServer_Stub stub(channel_);
@@ -236,8 +212,7 @@ std::shared_ptr<ExplainInfo> TabletSdkImpl::Explain(const std::string& db,
     }
 
     vm::Schema internal_input_schema;
-    bool ok = codec::SchemaCodec::Decode(response.input_schema(),
-                                         &internal_input_schema);
+    bool ok = codec::SchemaCodec::Decode(response.input_schema(), &internal_input_schema);
     if (!ok) {
         status->msg = "fail to decode input schema";
         status->code = common::kSchemaCodecError;
@@ -245,25 +220,21 @@ std::shared_ptr<ExplainInfo> TabletSdkImpl::Explain(const std::string& db,
     }
     SchemaImpl input_schema(internal_input_schema);
     vm::Schema internal_output_schema;
-    ok = codec::SchemaCodec::Decode(response.output_schema(),
-                                    &internal_output_schema);
+    ok = codec::SchemaCodec::Decode(response.output_schema(), &internal_output_schema);
     if (!ok) {
         status->msg = "fail to decode output  schema";
         status->code = common::kSchemaCodecError;
         return std::shared_ptr<ExplainInfo>();
     }
     SchemaImpl output_schema(internal_output_schema);
-    std::shared_ptr<ExplainInfoImpl> impl(new ExplainInfoImpl(
-        input_schema, output_schema, response.logical_plan(),
-        response.physical_plan(), response.ir()));
+    std::shared_ptr<ExplainInfoImpl> impl(new ExplainInfoImpl(input_schema, output_schema, response.logical_plan(),
+                                                              response.physical_plan(), response.ir()));
     status->code = common::kOk;
     return impl;
 }
 
-void TabletSdkImpl::GetSqlPlan(const std::string& db, const std::string& sql,
-                               node::NodeManager& node_manager,
-                               node::PlanNodeList& plan_trees,
-                               sdk::Status& status) {
+void TabletSdkImpl::GetSqlPlan(const std::string& db, const std::string& sql, node::NodeManager& node_manager,
+                               node::PlanNodeList& plan_trees, sdk::Status& status) {
     parser::HybridSeParser parser;
     plan::SimplePlanner planner(&node_manager);
     base::Status sql_status;
@@ -286,12 +257,9 @@ void TabletSdkImpl::GetSqlPlan(const std::string& db, const std::string& sql,
         return;
     }
 }
-void TabletSdkImpl::BuildInsertRequest(const std::string& db,
-                                       const std::string& table_name,
-                                       const std::vector<std::string>& columns,
-                                       node::ExprListNode* values,
-                                       tablet::InsertRequest* request,
-                                       sdk::Status* status) {
+void TabletSdkImpl::BuildInsertRequest(const std::string& db, const std::string& table_name,
+                                       const std::vector<std::string>& columns, node::ExprListNode* values,
+                                       tablet::InsertRequest* request, sdk::Status* status) {
     if (nullptr == values) {
         status->code = -1;
         status->msg = "Insert Values Is Null";
@@ -311,36 +279,30 @@ void TabletSdkImpl::BuildInsertRequest(const std::string& db,
     std::map<std::string, node::ExprNode*> column_value_map;
     if (!columns.empty()) {
         if (columns.size() != values->children_.size()) {
-            status->msg =
-                "Fail Build Request: insert column size != value size";
+            status->msg = "Fail Build Request: insert column size != value size";
             status->code = -1;
             LOG(WARNING) << status->msg;
             return;
         }
         for (size_t i = 0; i < columns.size(); i++) {
-            column_value_map.insert(
-                std::make_pair(columns[i], values->children_[i]));
+            column_value_map.insert(std::make_pair(columns[i], values->children_[i]));
         }
     } else {
-        if (schema.columns().size() !=
-            static_cast<int32_t>(values->children_.size())) {
-            status->msg =
-                "Fail Build Request: insert column size != value size";
+        if (schema.columns().size() != static_cast<int32_t>(values->children_.size())) {
+            status->msg = "Fail Build Request: insert column size != value size";
             status->code = -1;
             LOG(WARNING) << status->msg;
             return;
         }
         for (int i = 0; i < schema.columns().size(); i++) {
-            column_value_map.insert(
-                std::make_pair(schema.columns(i).name(), values->children_[i]));
+            column_value_map.insert(std::make_pair(schema.columns(i).name(), values->children_[i]));
         }
     }
     uint32_t str_size = 0;
     for (auto value : values->children_) {
         switch (value->GetExprType()) {
             case node::kExprPrimary: {
-                node::ConstNode* primary =
-                    dynamic_cast<node::ConstNode*>(value);
+                node::ConstNode* primary = dynamic_cast<node::ConstNode*>(value);
                 switch (primary->GetDataType()) {
                     case node::kVarchar: {
                         str_size += strlen(primary->GetStr());
@@ -354,8 +316,7 @@ void TabletSdkImpl::BuildInsertRequest(const std::string& db,
             }
             default: {
                 status->code = common::kTypeError;
-                status->msg = "can not insert value with type " +
-                              node::ExprTypeName(value->GetExprType());
+                status->msg = "can not insert value with type " + node::ExprTypeName(value->GetExprType());
                 return;
             }
         }
@@ -376,8 +337,7 @@ void TabletSdkImpl::BuildInsertRequest(const std::string& db,
             rb.AppendNULL();
             continue;
         }
-        const node::ConstNode* primary =
-            dynamic_cast<const node::ConstNode*>(expr_node_it->second);
+        const node::ConstNode* primary = dynamic_cast<const node::ConstNode*>(expr_node_it->second);
         if (primary->IsNull()) {
             rb.AppendNULL();
             continue;
@@ -409,8 +369,7 @@ void TabletSdkImpl::BuildInsertRequest(const std::string& db,
                 break;
             }
             case type::kVarchar: {
-                ok = rb.AppendString(primary->GetStr(),
-                                     strlen(primary->GetStr()));
+                ok = rb.AppendString(primary->GetStr(), strlen(primary->GetStr()));
                 break;
             }
             case type::kTimestamp: {
@@ -430,16 +389,14 @@ void TabletSdkImpl::BuildInsertRequest(const std::string& db,
             }
             default: {
                 status->code = common::kTypeError;
-                status->msg = "can not handle data type " +
-                              node::DataTypeName(primary->GetDataType());
+                status->msg = "can not handle data type " + node::DataTypeName(primary->GetDataType());
                 LOG(WARNING) << status->msg;
                 return;
             }
         }
         if (!ok) {
             status->code = common::kTypeError;
-            status->msg = "can not handle data type " +
-                          node::DataTypeName(primary->GetDataType());
+            status->msg = "can not handle data type " + node::DataTypeName(primary->GetDataType());
 
             LOG(WARNING) << status->msg;
             return;
@@ -448,8 +405,7 @@ void TabletSdkImpl::BuildInsertRequest(const std::string& db,
     status->code = 0;
 }
 
-void TabletSdkImpl::Insert(const std::string& db, const std::string& sql,
-                           sdk::Status* status) {
+void TabletSdkImpl::Insert(const std::string& db, const std::string& sql, sdk::Status* status) {
     if (status == NULL) {
         LOG(WARNING) << "status is null";
         return;
@@ -469,8 +425,7 @@ void TabletSdkImpl::Insert(const std::string& db, const std::string& sql,
     node::PlanNode* plan = plan_trees[0];
     switch (plan->GetType()) {
         case node::kPlanTypeInsert: {
-            node::InsertPlanNode* insert_plan =
-                dynamic_cast<node::InsertPlanNode*>(plan);
+            node::InsertPlanNode* insert_plan = dynamic_cast<node::InsertPlanNode*>(plan);
 
             const node::InsertStmt* insert_stmt = insert_plan->GetInsertNode();
             if (nullptr == insert_stmt) {
@@ -478,12 +433,10 @@ void TabletSdkImpl::Insert(const std::string& db, const std::string& sql,
                 status->msg = "fail to execute insert statement with null node";
                 return;
             }
-            for (auto iter = insert_stmt->values_.cbegin();
-                 iter != insert_stmt->values_.cend(); iter++) {
+            for (auto iter = insert_stmt->values_.cbegin(); iter != insert_stmt->values_.cend(); iter++) {
                 tablet::InsertRequest request;
-                BuildInsertRequest(
-                    db, insert_stmt->table_name_, insert_stmt->columns_,
-                    dynamic_cast<node::ExprListNode*>(*iter), &request, status);
+                BuildInsertRequest(db, insert_stmt->table_name_, insert_stmt->columns_,
+                                   dynamic_cast<node::ExprListNode*>(*iter), &request, status);
                 if (status->code != 0) {
                     return;
                 }
@@ -497,8 +450,7 @@ void TabletSdkImpl::Insert(const std::string& db, const std::string& sql,
         }
         default: {
             status->code = common::kUnSupport;
-            status->msg = "can not execute plan type " +
-                          node::NameOfPlanNodeType(plan->GetType());
+            status->msg = "can not execute plan type " + node::NameOfPlanNodeType(plan->GetType());
             return;
         }
     }

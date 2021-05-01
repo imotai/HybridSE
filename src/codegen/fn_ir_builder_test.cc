@@ -91,16 +91,13 @@ void CheckResult(std::string test, R exp, V1 a, V2 b) {
     }
     LOG(INFO) << "after opt with ins cnt " << m->getInstructionCount();
     m->print(::llvm::errs(), NULL, true, true);
-    auto jit = std::unique_ptr<vm::HybridSeJitWrapper>(
-        vm::HybridSeJitWrapper::Create());
+    auto jit = std::unique_ptr<vm::HybridSeJitWrapper>(vm::HybridSeJitWrapper::Create());
     jit->Init();
     vm::HybridSeJitWrapper::InitJitSymbols(jit.get());
     ASSERT_TRUE(jit->AddModule(std::move(m), std::move(ctx)));
-    auto test_fn =
-        (R(*)(V1, V2))jit->FindFunction(fn_def->header_->GeIRFunctionName());
+    auto test_fn = (R(*)(V1, V2))jit->FindFunction(fn_def->header_->GeIRFunctionName());
     R result = test_fn(a, b);
-    LOG(INFO) << "exp: " << std::to_string(exp)
-              << ", result: " << std::to_string(result);
+    LOG(INFO) << "exp: " << std::to_string(exp) << ", result: " << std::to_string(result);
     ASSERT_EQ(exp, result);
 }
 
@@ -123,8 +120,7 @@ TEST_F(FnIRBuilderTest, test_sub_int32) {
 }
 
 TEST_F(FnIRBuilderTest, test_bracket_int32) {
-    const std::string test =
-        "%%fun\ndef test(a:i32,b:i32):i32\n    c=a*(b+1)\n    return c\nend";
+    const std::string test = "%%fun\ndef test(a:i32,b:i32):i32\n    c=a*(b+1)\n    return c\nend";
     CheckResult(test, 3, 1, 2);
 }
 
@@ -257,8 +253,7 @@ TEST_F(FnIRBuilderTest, test_for_in_sum) {
     hybridse::codec::ArrayListV<int32_t> list(&vec);
     hybridse::codec::ListRef<> list_ref;
     list_ref.list = reinterpret_cast<int8_t *>(&list);
-    CheckResult<int32_t, hybridse::codec::ListRef<> *, int32_t>(
-        test, 1 + 3 + 5 + 7 + 9, &list_ref, 0);
+    CheckResult<int32_t, hybridse::codec::ListRef<> *, int32_t>(test, 1 + 3 + 5 + 7 + 9, &list_ref, 0);
 }
 
 TEST_F(FnIRBuilderTest, test_for_in_sum_ret) {
@@ -278,8 +273,7 @@ TEST_F(FnIRBuilderTest, test_for_in_sum_ret) {
     hybridse::codec::ArrayListV<int32_t> list(&vec);
     hybridse::codec::ListRef<> list_ref;
     list_ref.list = reinterpret_cast<int8_t *>(&list);
-    CheckResult<int32_t, hybridse::codec::ListRef<> *, int32_t>(
-        test, 1 + 3 + 5 + 7, &list_ref, 0);
+    CheckResult<int32_t, hybridse::codec::ListRef<> *, int32_t>(test, 1 + 3 + 5 + 7, &list_ref, 0);
 }
 
 TEST_F(FnIRBuilderTest, test_for_in_condition_sum) {
@@ -297,14 +291,10 @@ TEST_F(FnIRBuilderTest, test_for_in_condition_sum) {
     hybridse::codec::ArrayListV<int32_t> list(&vec);
     hybridse::codec::ListRef<> list_ref;
     list_ref.list = reinterpret_cast<int8_t *>(&list);
-    CheckResult<int32_t, hybridse::codec::ListRef<> *, int32_t>(
-        test, 1 + 3 + 5 + 7 + 9, &list_ref, 0);
-    CheckResult<int32_t, hybridse::codec::ListRef<> *, int32_t>(
-        test, 3 + 5 + 7 + 9, &list_ref, 1);
-    CheckResult<int32_t, hybridse::codec::ListRef<> *, int32_t>(
-        test, 3 + 5 + 7 + 9, &list_ref, 2);
-    CheckResult<int32_t, hybridse::codec::ListRef<> *, int32_t>(test, 5 + 7 + 9,
-                                                                &list_ref, 3);
+    CheckResult<int32_t, hybridse::codec::ListRef<> *, int32_t>(test, 1 + 3 + 5 + 7 + 9, &list_ref, 0);
+    CheckResult<int32_t, hybridse::codec::ListRef<> *, int32_t>(test, 3 + 5 + 7 + 9, &list_ref, 1);
+    CheckResult<int32_t, hybridse::codec::ListRef<> *, int32_t>(test, 3 + 5 + 7 + 9, &list_ref, 2);
+    CheckResult<int32_t, hybridse::codec::ListRef<> *, int32_t>(test, 5 + 7 + 9, &list_ref, 3);
 }
 
 TEST_F(FnIRBuilderTest, test_for_in_condition2_sum) {
@@ -326,12 +316,9 @@ TEST_F(FnIRBuilderTest, test_for_in_condition2_sum) {
     hybridse::codec::ArrayListV<int32_t> list(&vec);
     hybridse::codec::ListRef<> list_ref;
     list_ref.list = reinterpret_cast<int8_t *>(&list);
-    CheckResult<int32_t, hybridse::codec::ListRef<> *, int32_t>(
-        test, 4 + 2 + 1 + 3 + 5 + 5 + 5, &list_ref, 5);
-    CheckResult<int32_t, hybridse::codec::ListRef<> *, int32_t>(
-        test, 4 + 2 + 1 + 1 + 1 + 1 + 1, &list_ref, 1);
-    CheckResult<int32_t, hybridse::codec::ListRef<> *, int32_t>(
-        test, 4 + 2 + 1 + 2 + 2 + 2 + 2, &list_ref, 2);
+    CheckResult<int32_t, hybridse::codec::ListRef<> *, int32_t>(test, 4 + 2 + 1 + 3 + 5 + 5 + 5, &list_ref, 5);
+    CheckResult<int32_t, hybridse::codec::ListRef<> *, int32_t>(test, 4 + 2 + 1 + 1 + 1 + 1 + 1, &list_ref, 1);
+    CheckResult<int32_t, hybridse::codec::ListRef<> *, int32_t>(test, 4 + 2 + 1 + 2 + 2 + 2 + 2, &list_ref, 2);
 }
 
 TEST_F(FnIRBuilderTest, test_for_in_sum_add_assign) {
@@ -348,8 +335,7 @@ TEST_F(FnIRBuilderTest, test_for_in_sum_add_assign) {
     hybridse::codec::ArrayListV<int32_t> list(&vec);
     hybridse::codec::ListRef<> list_ref;
     list_ref.list = reinterpret_cast<int8_t *>(&list);
-    CheckResult<int32_t, hybridse::codec::ListRef<> *, int32_t>(
-        test, 1 + 3 + 5 + 7 + 9, &list_ref, 0);
+    CheckResult<int32_t, hybridse::codec::ListRef<> *, int32_t>(test, 1 + 3 + 5 + 7 + 9, &list_ref, 0);
 }
 TEST_F(FnIRBuilderTest, test_for_in_sum_minus_assign) {
     const std::string test =
@@ -365,8 +351,7 @@ TEST_F(FnIRBuilderTest, test_for_in_sum_minus_assign) {
     hybridse::codec::ArrayListV<int32_t> list(&vec);
     hybridse::codec::ListRef<> list_ref;
     list_ref.list = reinterpret_cast<int8_t *>(&list);
-    CheckResult<int32_t, hybridse::codec::ListRef<> *, int32_t>(
-        test, -1 - 3 - 5 - 7 - 9, &list_ref, 0);
+    CheckResult<int32_t, hybridse::codec::ListRef<> *, int32_t>(test, -1 - 3 - 5 - 7 - 9, &list_ref, 0);
 }
 
 TEST_F(FnIRBuilderTest, test_for_in_sum_multi_assign) {
@@ -383,8 +368,7 @@ TEST_F(FnIRBuilderTest, test_for_in_sum_multi_assign) {
     hybridse::codec::ArrayListV<int32_t> list(&vec);
     hybridse::codec::ListRef<> list_ref;
     list_ref.list = reinterpret_cast<int8_t *>(&list);
-    CheckResult<int32_t, hybridse::codec::ListRef<> *, int32_t>(
-        test, 1 * 3 * 5 * 7 * 9, &list_ref, 0);
+    CheckResult<int32_t, hybridse::codec::ListRef<> *, int32_t>(test, 1 * 3 * 5 * 7 * 9, &list_ref, 0);
 }
 
 TEST_F(FnIRBuilderTest, test_for_in_sum_fdiv_assign) {
@@ -401,8 +385,7 @@ TEST_F(FnIRBuilderTest, test_for_in_sum_fdiv_assign) {
     hybridse::codec::ArrayListV<int32_t> list(&vec);
     hybridse::codec::ListRef<> list_ref;
     list_ref.list = reinterpret_cast<int8_t *>(&list);
-    CheckResult<double, hybridse::codec::ListRef<> *, int32_t>(
-        test, 1.0 / 3.0 / 5.0 / 7.0 / 9.0, &list_ref, 0);
+    CheckResult<double, hybridse::codec::ListRef<> *, int32_t>(test, 1.0 / 3.0 / 5.0 / 7.0 / 9.0, &list_ref, 0);
 }
 }  // namespace codegen
 }  // namespace hybridse

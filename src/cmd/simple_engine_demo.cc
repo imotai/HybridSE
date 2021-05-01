@@ -158,8 +158,7 @@ int run() {
         base::Status get_status;
         BatchRunSession session;
         // compile sql
-        if (!engine.Get(sql, "simple_db", session, get_status) ||
-            get_status.code != common::kOk) {
+        if (!engine.Get(sql, "simple_db", session, get_status) || get_status.code != common::kOk) {
             return SIMPLE_ENGINE_COMPILE_ERROR;
         }
         std::vector<Row> outputs;

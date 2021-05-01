@@ -48,29 +48,25 @@ class HybridSeParser {
               node::NodeManager *manager,
               base::Status &status);  // NOLINT (runtime/references)
  private:
-    int CreateFnBlock(std::vector<node::FnNode *> vector, int start, int end,
-                      int32_t indent, node::FnNodeList *block,
+    int CreateFnBlock(std::vector<node::FnNode *> vector, int start, int end, int32_t indent, node::FnNodeList *block,
                       node::NodeManager *node_manager,
                       base::Status &status);  // NOLINT (runtime/references)
-    int ReflectFnDefNode(node::FnNodeFnDef *fn_def,
-                         node::NodeManager *node_manager,
+    int ReflectFnDefNode(node::FnNodeFnDef *fn_def, node::NodeManager *node_manager,
                          base::Status &status);  // NOLINT (runtime/references)
     // NOLINT
     bool SSAOptimized(const node::FnNodeList *block,
-                      std::map<std::string, node::FnNode *>
-                          &assign_var_map,    // NOLINT (runtime/references)
-                      base::Status &status);  // NOLINT (runtime/references)
+                      std::map<std::string, node::FnNode *> &assign_var_map,  // NOLINT (runtime/references)
+                      base::Status &status);                                  // NOLINT (runtime/references)
 };
 }  // namespace parser
 }  // namespace hybridse
 
 extern YY_BUFFER_STATE yy_scan_string(const char *yy_str, yyscan_t yyscanner);
 extern int yylex_init(yyscan_t *scanner);
-extern int yyparse(
-    yyscan_t scanner,
-    hybridse::node::NodePointVector &trees,  // NOLINT (runtime/references)
-    ::hybridse::node::NodeManager *node_manager,
-    ::hybridse::base::Status &status);  // NOLINT (runtime/references)
+extern int yyparse(yyscan_t scanner,
+                   hybridse::node::NodePointVector &trees,  // NOLINT (runtime/references)
+                   ::hybridse::node::NodeManager *node_manager,
+                   ::hybridse::base::Status &status);  // NOLINT (runtime/references)
 extern int yylex_destroy(yyscan_t yyscanner);
 extern void yyset_lineno(int line_number, yyscan_t scanner);
 extern void yyset_column(int line_number, yyscan_t scanner);

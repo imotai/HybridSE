@@ -46,21 +46,17 @@ TEST_F(PlanNodeTest, PlanNodeEqualsTest) {
     ASSERT_TRUE(rename1->Equals(rename2));
     ASSERT_FALSE(rename1->Equals(rename3));
 
-    ExprNode *expr1 = manager_->MakeBinaryExprNode(
-        manager_->MakeColumnRefNode("col1", ""),
-        manager_->MakeColumnRefNode("col2", ""), node::kFnOpEq);
+    ExprNode *expr1 = manager_->MakeBinaryExprNode(manager_->MakeColumnRefNode("col1", ""),
+                                                   manager_->MakeColumnRefNode("col2", ""), node::kFnOpEq);
 
-    ExprNode *expr2 = manager_->MakeBinaryExprNode(
-        manager_->MakeColumnRefNode("col1", ""),
-        manager_->MakeColumnRefNode("col2", ""), node::kFnOpEq);
+    ExprNode *expr2 = manager_->MakeBinaryExprNode(manager_->MakeColumnRefNode("col1", ""),
+                                                   manager_->MakeColumnRefNode("col2", ""), node::kFnOpEq);
 
-    ExprNode *expr3 = manager_->MakeBinaryExprNode(
-        manager_->MakeColumnRefNode("col1", ""),
-        manager_->MakeColumnRefNode("col3", ""), node::kFnOpEq);
+    ExprNode *expr3 = manager_->MakeBinaryExprNode(manager_->MakeColumnRefNode("col1", ""),
+                                                   manager_->MakeColumnRefNode("col3", ""), node::kFnOpEq);
 
-    ExprNode *expr4 = manager_->MakeBinaryExprNode(
-        manager_->MakeColumnRefNode("col1", ""),
-        manager_->MakeColumnRefNode("col2", ""), node::kFnOpGt);
+    ExprNode *expr4 = manager_->MakeBinaryExprNode(manager_->MakeColumnRefNode("col1", ""),
+                                                   manager_->MakeColumnRefNode("col2", ""), node::kFnOpGt);
     ASSERT_TRUE(expr1->Equals(expr1));
     ASSERT_TRUE(expr1->Equals(expr2));
     ASSERT_FALSE(expr1->Equals(expr3));
@@ -103,14 +99,10 @@ TEST_F(PlanNodeTest, PlanNodeEqualsTest) {
     ASSERT_FALSE(order1->Equals(order4));
 
     // sort
-    PlanNode *sort1 = manager_->MakeSortPlanNode(
-        table1, dynamic_cast<const OrderByNode *>(order1));
-    PlanNode *sort2 = manager_->MakeSortPlanNode(
-        table1, dynamic_cast<const OrderByNode *>(order2));
-    PlanNode *sort3 = manager_->MakeSortPlanNode(
-        table1, dynamic_cast<const OrderByNode *>(order3));
-    PlanNode *sort4 = manager_->MakeSortPlanNode(
-        table1, dynamic_cast<const OrderByNode *>(order4));
+    PlanNode *sort1 = manager_->MakeSortPlanNode(table1, dynamic_cast<const OrderByNode *>(order1));
+    PlanNode *sort2 = manager_->MakeSortPlanNode(table1, dynamic_cast<const OrderByNode *>(order2));
+    PlanNode *sort3 = manager_->MakeSortPlanNode(table1, dynamic_cast<const OrderByNode *>(order3));
+    PlanNode *sort4 = manager_->MakeSortPlanNode(table1, dynamic_cast<const OrderByNode *>(order4));
     ASSERT_TRUE(sort1->Equals(sort1));
     ASSERT_TRUE(sort1->Equals(sort2));
     ASSERT_FALSE(sort1->Equals(sort3));

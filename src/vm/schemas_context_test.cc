@@ -32,8 +32,7 @@ std::vector<SqlCase> InitCases(std::string yaml_path);
 void InitCases(std::string yaml_path, std::vector<SqlCase>& cases);  // NOLINT
 
 void InitCases(std::string yaml_path, std::vector<SqlCase>& cases) {  // NOLINT
-    if (!SqlCase::CreateSqlCasesFromYaml(
-            hybridse::sqlcase::FindSqlCaseBaseDirPath(), yaml_path, cases)) {
+    if (!SqlCase::CreateSqlCasesFromYaml(hybridse::sqlcase::FindSqlCaseBaseDirPath(), yaml_path, cases)) {
         FAIL();
     }
 }
@@ -45,9 +44,7 @@ std::vector<SqlCase> InitCases(std::string yaml_path) {
 }
 class SchemasContextTest : public ::testing::Test {
  public:
-    SchemasContextTest()
-        : catalog(new vm::SimpleCatalog()),
-          plan_ctx(&nm, &lib, "db", catalog, false) {}
+    SchemasContextTest() : catalog(new vm::SimpleCatalog()), plan_ctx(&nm, &lib, "db", catalog, false) {}
     node::NodeManager nm;
     udf::UdfLibrary lib;
     std::shared_ptr<vm::SimpleCatalog> catalog;
@@ -68,9 +65,7 @@ class SchemasContextResolveTest : public ::testing::TestWithParam<SqlCase> {
     SchemasContextResolveTest() {}
 };
 
-void CheckColumnResolveCase(const std::string& relation_name,
-                            const std::string& column_name,
-                            PhysicalOpNode* node,
+void CheckColumnResolveCase(const std::string& relation_name, const std::string& column_name, PhysicalOpNode* node,
                             const ColumnNameResolveResult& expect) {
     Status status;
     const auto schemas_context = node->schemas_ctx();
@@ -78,8 +73,7 @@ void CheckColumnResolveCase(const std::string& relation_name,
     // check simple resolve
     size_t schema_idx;
     size_t col_idx;
-    status = schemas_context->ResolveColumnIndexByName(
-        relation_name, column_name, &schema_idx, &col_idx);
+    status = schemas_context->ResolveColumnIndexByName(relation_name, column_name, &schema_idx, &col_idx);
     if (expect.is_error) {
         LOG(INFO) << status;
         ASSERT_FALSE(status.isOK());
@@ -100,13 +94,10 @@ void CheckColumnResolveCase(const std::string& relation_name,
     size_t child_column_id;
     size_t source_column_id;
     const PhysicalOpNode* source_node = nullptr;
-    status = schemas_context->ResolveColumnID(
-        relation_name, column_name, &column_id, &child_path_idx,
-        &child_column_id, &source_column_id, &source_node);
+    status = schemas_context->ResolveColumnID(relation_name, column_name, &column_id, &child_path_idx, &child_column_id,
+                                              &source_column_id, &source_node);
     ASSERT_TRUE(status.isOK()) << status;
-    ASSERT_EQ(
-        schemas_context->GetSchemaSource(schema_idx)->GetColumnID(col_idx),
-        column_id);
+    ASSERT_EQ(schemas_context->GetSchemaSource(schema_idx)->GetColumnID(col_idx), column_id);
 
     if (expect.path_idx >= -1) {
         ASSERT_EQ(expect.path_idx, child_path_idx);
@@ -115,8 +106,8 @@ void CheckColumnResolveCase(const std::string& relation_name,
         ASSERT_TRUE(source_node != nullptr);
         size_t source_schema_idx;
         size_t source_col_idx;
-        status = source_node->schemas_ctx()->ResolveColumnIndexByID(
-            source_column_id, &source_schema_idx, &source_col_idx);
+        status =
+            source_node->schemas_ctx()->ResolveColumnIndexByID(source_column_id, &source_schema_idx, &source_col_idx);
         ASSERT_EQ(static_cast<size_t>(expect.source_col_idx), source_col_idx);
     }
     if (!expect.source_name.empty()) {
@@ -125,8 +116,7 @@ void CheckColumnResolveCase(const std::string& relation_name,
     }
 }
 
-void CheckColumnResolveCase(const YAML::Node& resolve_case,
-                            PhysicalOpNode* node) {
+void CheckColumnResolveCase(const YAML::Node& resolve_case, PhysicalOpNode* node) {
     ColumnNameResolveResult expect;
     std::string relation_name = "";
     if (resolve_case["relation_name"]) {
@@ -134,26 +124,21 @@ void CheckColumnResolveCase(const YAML::Node& resolve_case,
     }
     std::string column_name = resolve_case["column_name"].as<std::string>();
     if (resolve_case["is_error"]) {
-        if (boost::lexical_cast<int32_t>(
-                resolve_case["is_error"].as<std::string>() == "true")) {
+        if (boost::lexical_cast<int32_t>(resolve_case["is_error"].as<std::string>() == "true")) {
             expect.is_error = true;
         }
     }
     if (resolve_case["schema_idx"]) {
-        expect.schema_idx = boost::lexical_cast<int32_t>(
-            resolve_case["schema_idx"].as<std::string>());
+        expect.schema_idx = boost::lexical_cast<int32_t>(resolve_case["schema_idx"].as<std::string>());
     }
     if (resolve_case["col_idx"]) {
-        expect.col_idx = boost::lexical_cast<int32_t>(
-            resolve_case["col_idx"].as<std::string>());
+        expect.col_idx = boost::lexical_cast<int32_t>(resolve_case["col_idx"].as<std::string>());
     }
     if (resolve_case["path_idx"]) {
-        expect.path_idx = boost::lexical_cast<int32_t>(
-            resolve_case["path_idx"].as<std::string>());
+        expect.path_idx = boost::lexical_cast<int32_t>(resolve_case["path_idx"].as<std::string>());
     }
     if (resolve_case["source_col_idx"]) {
-        expect.source_col_idx = boost::lexical_cast<int32_t>(
-            resolve_case["source_col_idx"].as<std::string>());
+        expect.source_col_idx = boost::lexical_cast<int32_t>(resolve_case["source_col_idx"].as<std::string>());
     }
     if (resolve_case["source_name"]) {
         expect.source_name = resolve_case["source_name"].as<std::string>();
@@ -194,20 +179,15 @@ PhysicalOpNode* GetTestSqlPlan(SqlCase& sql_case,  // NOLINT
         LOG(WARNING) << status;
         return nullptr;
     }
-    return std::dynamic_pointer_cast<SqlCompileInfo>(session->GetCompileInfo())
-        ->get_sql_context()
-        .physical_plan;
+    return std::dynamic_pointer_cast<SqlCompileInfo>(session->GetCompileInfo())->get_sql_context().physical_plan;
 }
 
-INSTANTIATE_TEST_CASE_P(
-    ResolveNameTest, SchemasContextResolveTest,
-    testing::ValuesIn(
-        InitCases("/cases/schemas_context/resolve_column_name.yaml")));
+INSTANTIATE_TEST_CASE_P(ResolveNameTest, SchemasContextResolveTest,
+                        testing::ValuesIn(InitCases("/cases/schemas_context/resolve_column_name.yaml")));
 
 TEST_P(SchemasContextResolveTest, test_request_column_resolve) {
     SqlCase sql_case = GetParam();
-    LOG(INFO) << "Test resolve request mode sql root of: "
-              << sql_case.sql_str();
+    LOG(INFO) << "Test resolve request mode sql root of: " << sql_case.sql_str();
 
     RequestRunSession session;
     auto plan = GetTestSqlPlan(sql_case, &session);
@@ -216,8 +196,7 @@ TEST_P(SchemasContextResolveTest, test_request_column_resolve) {
 
 TEST_P(SchemasContextResolveTest, test_batch_column_resolve) {
     SqlCase sql_case = GetParam();
-    LOG(INFO) << "Test resolve request mode sql root of: "
-              << sql_case.sql_str();
+    LOG(INFO) << "Test resolve request mode sql root of: " << sql_case.sql_str();
 
     BatchRunSession session;
     auto plan = GetTestSqlPlan(sql_case, &session);
@@ -233,8 +212,7 @@ TEST_F(SchemasContextTest, NewSchemasContextTest) {
     BuildTableDef(t2);
     t2.set_name("t2");
 
-    auto init_source = [](SchemaSource* source, const type::TableDef& table,
-                          size_t offset) {
+    auto init_source = [](SchemaSource* source, const type::TableDef& table, size_t offset) {
         source->SetSourceName(table.name());
         source->SetSchema(&table.columns());
         for (int i = 0; i < table.columns_size(); ++i) {

@@ -53,8 +53,7 @@ void InitCases(std::string yaml_path, std::vector<SqlCase>& cases);  // NOLINT
 void InitCases(std::string yaml_path, std::vector<SqlCase>& cases) {  // NOLINT
     if (!SqlCase::CreateSqlCasesFromYaml(
             hybridse::sqlcase::FindSqlCaseBaseDirPath(), yaml_path, cases,
-            std::vector<std::string>({"physical-plan-unsupport",
-                                      "plan-unsupport", "parser-unsupport"}))) {
+            std::vector<std::string>({"physical-plan-unsupport", "plan-unsupport", "parser-unsupport"}))) {
         FAIL();
     }
 }
@@ -64,27 +63,18 @@ std::vector<SqlCase> InitCases(std::string yaml_path) {
     return cases;
 }
 class SqlCompilerTest : public ::testing::TestWithParam<SqlCase> {};
-INSTANTIATE_TEST_CASE_P(
-    SqlSimpleQueryParse, SqlCompilerTest,
-    testing::ValuesIn(InitCases("cases/plan/simple_query.yaml")));
-INSTANTIATE_TEST_CASE_P(
-    SqlWindowQueryParse, SqlCompilerTest,
-    testing::ValuesIn(InitCases("cases/plan/window_query.yaml")));
+INSTANTIATE_TEST_CASE_P(SqlSimpleQueryParse, SqlCompilerTest,
+                        testing::ValuesIn(InitCases("cases/plan/simple_query.yaml")));
+INSTANTIATE_TEST_CASE_P(SqlWindowQueryParse, SqlCompilerTest,
+                        testing::ValuesIn(InitCases("cases/plan/window_query.yaml")));
 
-INSTANTIATE_TEST_CASE_P(
-    SqlWherePlan, SqlCompilerTest,
-    testing::ValuesIn(InitCases("cases/plan/where_query.yaml")));
+INSTANTIATE_TEST_CASE_P(SqlWherePlan, SqlCompilerTest, testing::ValuesIn(InitCases("cases/plan/where_query.yaml")));
 
-INSTANTIATE_TEST_CASE_P(
-    SqlGroupPlan, SqlCompilerTest,
-    testing::ValuesIn(InitCases("cases/plan/group_query.yaml")));
+INSTANTIATE_TEST_CASE_P(SqlGroupPlan, SqlCompilerTest, testing::ValuesIn(InitCases("cases/plan/group_query.yaml")));
 
-INSTANTIATE_TEST_CASE_P(
-    SqlJoinPlan, SqlCompilerTest,
-    testing::ValuesIn(InitCases("cases/plan/join_query.yaml")));
+INSTANTIATE_TEST_CASE_P(SqlJoinPlan, SqlCompilerTest, testing::ValuesIn(InitCases("cases/plan/join_query.yaml")));
 
-void CompilerCheck(std::shared_ptr<Catalog> catalog, const std::string sql,
-                   EngineMode engine_mode,
+void CompilerCheck(std::shared_ptr<Catalog> catalog, const std::string sql, EngineMode engine_mode,
                    const bool enable_batch_window_paralled) {
     SqlCompiler sql_compiler(catalog, false, true, false);
     SqlContext sql_context;
@@ -92,8 +82,7 @@ void CompilerCheck(std::shared_ptr<Catalog> catalog, const std::string sql,
     sql_context.db = "db";
     sql_context.engine_mode = engine_mode;
     sql_context.is_performance_sensitive = false;
-    sql_context.enable_batch_window_parallelization =
-        enable_batch_window_paralled;
+    sql_context.enable_batch_window_parallelization = enable_batch_window_paralled;
     base::Status compile_status;
     bool ok = sql_compiler.Compile(sql_context, compile_status);
     ASSERT_TRUE(ok);
@@ -106,12 +95,10 @@ void CompilerCheck(std::shared_ptr<Catalog> catalog, const std::string sql,
     PrintSchema(oss_schema, sql_context.schema);
     std::cout << "schema:\n" << oss_schema.str();
 }
-void CompilerCheck(std::shared_ptr<Catalog> catalog, const std::string sql,
-                   EngineMode engine_mode) {
+void CompilerCheck(std::shared_ptr<Catalog> catalog, const std::string sql, EngineMode engine_mode) {
     CompilerCheck(catalog, sql, engine_mode, false);
 }
-void RequestSchemaCheck(std::shared_ptr<Catalog> catalog, const std::string sql,
-                        const type::TableDef& exp_table_def) {
+void RequestSchemaCheck(std::shared_ptr<Catalog> catalog, const std::string sql, const type::TableDef& exp_table_def) {
     SqlCompiler sql_compiler(catalog);
     SqlContext sql_context;
     sql_context.sql = sql;
@@ -135,11 +122,9 @@ void RequestSchemaCheck(std::shared_ptr<Catalog> catalog, const std::string sql,
     std::cout << "request schema:\n" << oss_request_schema.str();
 
     ASSERT_EQ(sql_context.request_name, exp_table_def.name());
-    ASSERT_EQ(sql_context.request_schema.size(),
-              exp_table_def.columns().size());
+    ASSERT_EQ(sql_context.request_schema.size(), exp_table_def.columns().size());
     for (int i = 0; i < sql_context.request_schema.size(); i++) {
-        ASSERT_EQ(sql_context.request_schema.Get(i).DebugString(),
-                  exp_table_def.columns().Get(i).DebugString());
+        ASSERT_EQ(sql_context.request_schema.Get(i).DebugString(), exp_table_def.columns().Get(i).DebugString());
     }
 }
 

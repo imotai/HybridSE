@@ -49,8 +49,7 @@ class BlockIRBuilderTest : public ::testing::Test {
     parser::HybridSeParser *parser_;
 };
 
-void CheckResult(node::NodeManager *manager, std::string test, int32_t res,
-                 int32_t a, int32_t b) {
+void CheckResult(node::NodeManager *manager, std::string test, int32_t res, int32_t a, int32_t b) {
     node::NodePointVector trees;
     node::PlanNodeList plan_trees;
     base::Status status;
@@ -62,8 +61,7 @@ void CheckResult(node::NodeManager *manager, std::string test, int32_t res,
     auto m = make_unique<Module>("custom_fn", *ctx);
     FnIRBuilder fn_ir_builder(m.get());
     ::llvm::Function *func = nullptr;
-    bool ok = fn_ir_builder.Build(dynamic_cast<node::FnNodeFnDef *>(trees[0]),
-                                  &func, status);
+    bool ok = fn_ir_builder.Build(dynamic_cast<node::FnNodeFnDef *>(trees[0]), &func, status);
     ASSERT_TRUE(ok);
     m->print(::llvm::errs(), NULL, true, true);
     LOG(INFO) << "before opt with ins cnt " << m->getInstructionCount();
@@ -80,8 +78,7 @@ void CheckResult(node::NodeManager *manager, std::string test, int32_t res,
     auto J = ExitOnErr(LLJITBuilder().create());
     ExitOnErr(J->addIRModule(ThreadSafeModule(std::move(m), std::move(ctx))));
     auto test_jit = ExitOnErr(J->lookup("test.int32.int32"));
-    int32_t (*test_fn)(int32_t, int32_t) =
-        (int32_t(*)(int32_t, int32_t))test_jit.getAddress();
+    int32_t (*test_fn)(int32_t, int32_t) = (int32_t(*)(int32_t, int32_t))test_jit.getAddress();
     ASSERT_EQ(res, test_fn(a, b));
 }
 
